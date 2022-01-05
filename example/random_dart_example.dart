@@ -1,4 +1,5 @@
-import 'package:random_dart/random_dart.dart';
+
+import 'package:style_random/random_dart.dart';
 
 void main() {
 
@@ -12,7 +13,7 @@ void main() {
 
   print(gen.description());
 
-   print(gen.generateString());
+  print(gen.generateString());
   print(gen.generateString());
   print(gen.generateString());
   print(gen.generateString());

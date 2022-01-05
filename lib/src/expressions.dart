@@ -48,42 +48,42 @@ class CharacterClassExpression extends RandomExpression {
           String? r;
           while (r == null || !endOption.availableAt(r, true)) {
             r = charClass.characters[
-                delegate.nextInt(maxInt: charClass.characters.length - 1)];
+            delegate.nextInt(maxInt: charClass.characters.length - 1)];
           }
           res = r;
         } else if (notEndOption is NotStartOption) {
           String? r;
           while (r == null || notEndOption.availableAt(r, true)) {
             r = charClass.characters[
-                delegate.nextInt(maxInt: charClass.characters.length - 1)];
+            delegate.nextInt(maxInt: charClass.characters.length - 1)];
           }
           res = r;
         } else {
           res = charClass.characters[
-              delegate.nextInt(maxInt: charClass.characters.length - 1)];
+          delegate.nextInt(maxInt: charClass.characters.length - 1)];
         }
       } else if (index == lengthOption - 1) {
         if (endOption is EndOption) {
           String? r;
           while (r == null || !endOption.availableAt(r, true)) {
             r = charClass.characters[
-                delegate.nextInt(maxInt: charClass.characters.length - 1)];
+            delegate.nextInt(maxInt: charClass.characters.length - 1)];
           }
           res = r;
         } else if (notEndOption is NotEndOption) {
           String? r;
           while (r == null || notEndOption.availableAt(r, true)) {
             r = charClass.characters[
-                delegate.nextInt(maxInt: charClass.characters.length - 1)];
+            delegate.nextInt(maxInt: charClass.characters.length - 1)];
           }
           res = r;
         } else {
           res = charClass.characters[
-              delegate.nextInt(maxInt: charClass.characters.length - 1)];
+          delegate.nextInt(maxInt: charClass.characters.length - 1)];
         }
       } else {
         res = charClass.characters[
-            delegate.nextInt(maxInt: charClass.characters.length - 1)];
+        delegate.nextInt(maxInt: charClass.characters.length - 1)];
       }
 
       return res;

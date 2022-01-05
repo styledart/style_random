@@ -1,4 +1,4 @@
-import 'package:random_dart/random_dart.dart';
+import 'package:style_random/random_dart.dart';
 import 'package:test/test.dart';
 
 Matcher haveOption<T extends Option>() {

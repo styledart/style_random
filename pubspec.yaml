@@ -1,14 +1,12 @@
-name: random_dart
-description: A starting point for Dart libraries or applications.
-version: 1.0.0
-# homepage: https://www.example.com
+name: style_random
+description: Random string generator with easy syntax and many complex options. Specify random string by length, character classes, starting with , ending with or dupblication.
+version: 0.0.1
+homepage: https://github.com/styledart/style_random
+repository: https://github.com/styledart/style_random
 
 environment:
   sdk: '>=2.15.0 <3.0.0'
 
-
-# dependencies:
-#   path: ^1.8.0
 
 dev_dependencies:
   lints: ^1.0.0
