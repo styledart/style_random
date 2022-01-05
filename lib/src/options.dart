@@ -360,8 +360,8 @@ class LengthMatrix {
         min: haveRange ? (_min ?? 0) : null,
         max: haveRange
             ? haveNotHaveLength
-                ? null
-                : _max
+            ? null
+            : _max
             : null);
   }
 
@@ -386,7 +386,7 @@ class LengthMatrix {
     _childrenLenMatrix[2][i] = _len;
     _childrenLenMatrix[3][i] = _len != null ? 0 : 1;
     _childrenLenMatrix[4][i] =
-        _len == null && _min == null && _max == null ? 0 : 1;
+    _len == null && _min == null && _max == null ? 0 : 1;
   }
 
   ///   0     1    2       3         4            5
@@ -466,8 +466,8 @@ class LengthOption extends Option {
               min: haveRange ? (_min ?? 0) : null,
               max: haveRange
                   ? haveNotHaveLength
-                      ? null
-                      : _max
+                  ? null
+                  : _max
                   : null);
         }
       }
@@ -482,13 +482,13 @@ class LengthOption extends Option {
             if (((_childrenLength!.min ?? 0) > (max ?? double.infinity))) {
               throw FormatException(
                   "children min(${_childrenLength!.min ?? 0}) > "
-                  "parent max(${max ?? double.infinity})");
+                      "parent max(${max ?? double.infinity})");
             }
 
             if (((_childrenLength!.max ?? double.infinity) < (min ?? 0))) {
               throw FormatException(
                   "children max(${_childrenLength!.max ?? double.infinity})"
-                  " < parent min(${(min ?? 0)})");
+                      " < parent min(${(min ?? 0)})");
             }
           }
 
@@ -701,8 +701,8 @@ mixin EndsMixin on Option {
 
     var childHaveSame = child._options.values
         .where((e) =>
-            e is EndsMixin &&
-            (isStartOption ? e.isStartOption : !e.isStartOption))
+    e is EndsMixin &&
+        (isStartOption ? e.isStartOption : !e.isStartOption))
         .isNotEmpty;
     if (childHaveSame) {
       throw FormatException("There is end option on parent already");
