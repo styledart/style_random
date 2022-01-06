@@ -1,34 +1,52 @@
 {
-  generator: {
-    expressions: [
+  "generator": {
+    "expressions": [
       {
-        group: {
-          expressions: [
-            {
-              char_class: {
-                class: AllCharacters,
-                options: []
-              }
+        "type": "group",
+        "expressions": [
+          {
+            "type": "char_class",
+            "char_class": {
+              "class": "AllCharacters",
+              "options": []
             }
-          ],
-          options: [
-            {
-              option: <,
-              params: [
-                a
-              ]
-            }
-          ]
-        }
+          }
+        ],
+        "options": [
+          {
+            "option": "s",
+            "params": [
+              "#"
+            ]
+          },
+          {
+            "option": "e",
+            "params": [
+              "#"
+            ]
+          }
+        ]
       }
     ],
-    options: {{
-  option: l,
-  params: [
-    10
-  ]
-}: {option: l, params: [10]}, {option: <, params: [a]}: {option: <, params: [a]
-}
-}
-}
+    "options": [
+      {
+        "option": "l",
+        "params": [
+          "20"
+        ]
+      },
+      {
+        "option": "s",
+        "params": [
+          "#"
+        ]
+      },
+      {
+        "option": "e",
+        "params": [
+          "#"
+        ]
+      }
+    ]
+  }
 }

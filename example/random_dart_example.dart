@@ -1,4 +1,6 @@
 
+import 'dart:convert';
+
 import 'package:style_random/random_dart.dart';
 
 void main() {
@@ -9,9 +11,8 @@ void main() {
 
 
 
-  var gen = RandomGenerator("[.]/l(10)/s(#)");
+  var gen = RandomGenerator("/l(20).[a#]/l(40)/s(a)/e(#)");
 
-  print(gen.description());
 
   print(gen.generateString());
   print(gen.generateString());

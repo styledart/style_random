@@ -42,14 +42,17 @@ class RandomGenerator extends RandomExpression with ExpressionGroup {
     return {
       "generator": {
         "expressions": expressions.map((e) => e.description()).toList(),
-        "options": Map.fromIterable(options.map((e) => e.description())),
+        "options": options.map((e) => e.description()).toList(),
       }
     };
   }
 
   @override
   String _sample(RandomDelegate delegate, int lengthOption,
-      {EndsMixin? endOption, EndsMixin? notEndOption}) {
+      {StartOption? startWith,
+        NotStartOption? notStartOption,
+        EndOption? endOption,
+        NotEndOption? notEndOption}) {
     throw UnimplementedError();
   }
 }

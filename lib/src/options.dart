@@ -266,22 +266,30 @@ class LengthMatrix {
   int _setFixedLenChildren(LengthOption? lengthOption) {
     int i = 0;
     var total = 0;
+
     while (i < length) {
       if (!hasLengthOption(i)) {
-        if (lengthOption == null || lengthOption.length != null) {
+
+        /// hasn't length option
+        if (lengthOption == null) {
           _childrenLenMatrix[2][i] = 1;
-        } else {
+        }
+        /*else if (lengthOption.length != null){
+
+        } */
+   /*     else {
           _childrenLenMatrix[0][i] = 1;
           _childrenLenMatrix[1][i] = lengthOption.max;
           _childrenLenMatrix[4][i] = 1;
-        }
+        }*/
       }
+
 
       if (len(i) != null) {
         total += len(i)!;
       }
 
-      if (min(i) != null) {
+      if (lengthOption == null && min(i) != null) {
         _childrenLenMatrix[2][i] = min(i);
         total += min(i)!;
       }
@@ -327,6 +335,7 @@ class LengthMatrix {
   LengthOption? getChildrenLenMerge() {
     int? _len, _min, _max;
 
+    var maxInf = false;
     var haveNotHaveLength = false;
     var haveRange = false;
 
@@ -339,7 +348,7 @@ class LengthMatrix {
           _min = _min + (min(i) ?? 0);
 
           if (max(i) == null) {
-            haveNotHaveLength = true;
+            maxInf = true;
           } else {
             _max ??= 0;
             _max += max(i)!;
@@ -352,16 +361,19 @@ class LengthMatrix {
           _max ??= 0;
           _max += len(i)!;
         }
+      } else {
+        haveNotHaveLength = true;
       }
       i++;
     }
+
     return LengthOption(
-        length: haveRange ? null : _len,
-        min: haveRange ? (_min ?? 0) : null,
+        length: haveRange || haveNotHaveLength ? null : _len,
+        min: haveRange || haveNotHaveLength ? (_min ?? 0) : null,
         max: haveRange
-            ? haveNotHaveLength
-            ? null
-            : _max
+            ? haveNotHaveLength || maxInf
+                ? null
+                : _max
             : null);
   }
 
@@ -386,7 +398,7 @@ class LengthMatrix {
     _childrenLenMatrix[2][i] = _len;
     _childrenLenMatrix[3][i] = _len != null ? 0 : 1;
     _childrenLenMatrix[4][i] =
-    _len == null && _min == null && _max == null ? 0 : 1;
+        _len == null && _min == null && _max == null ? 0 : 1;
   }
 
   ///   0     1    2       3         4            5
@@ -413,7 +425,7 @@ class LengthOption extends Option {
     }
   }
 
-  LengthOption? _childrenLength;
+  LengthMatrix? _childrenLength;
 
   bool get maxBounded {
     return length != null || max != null;
@@ -423,108 +435,69 @@ class LengthOption extends Option {
   void _check(RandomExpression? parent, List<RandomExpression>? children) {
     try {
       ///1
-      bool haveNotHaveLength = true;
+
       if (children == null) {
-        _childrenLength = LengthOption(min: 0, max: null);
+        _childrenLength = null;
       } else {
-        int? _len, _min, _max;
-
-        var haveLenExpressions = (children)
-            .map((element) => element.length)
-            .where((element) => element != null)
-            .cast<LengthOption>();
-
-        if (haveLenExpressions.isEmpty) {
-          _childrenLength = LengthOption(min: 0, max: null);
-        } else {
-          haveNotHaveLength = (children).length != haveLenExpressions.length;
-          var haveRange = false;
-          for (var opt in haveLenExpressions) {
-            if (opt.isRange) {
-              haveRange = true;
-              _min ??= 0;
-              _min = _min + (opt.min ?? 0);
-
-              if (opt.max == null) {
-                haveNotHaveLength = true;
-              } else {
-                _max ??= 0;
-                _max += opt.max!;
-              }
-            } else {
-              _min ??= 0;
-              _min += opt.length!;
-              _len ??= 0;
-              _len += opt.length!;
-              _max ??= 0;
-              _max += opt.length!;
-            }
-          }
-
-          _childrenLength = LengthOption(
-              length: haveRange ? null : _len,
-              min: haveRange ? (_min ?? 0) : null,
-              max: haveRange
-                  ? haveNotHaveLength
-                  ? null
-                  : _max
-                  : null);
-        }
+        _childrenLength = LengthMatrix.fromChildren(children);
       }
+      var _childrenTotal = _childrenLength!.getChildrenLenMerge();
 
       ///e1
 
       ///2
       try {
         if (isRange) {
-          if (_childrenLength == null) {
-          } else if (_childrenLength!.isRange) {
-            if (((_childrenLength!.min ?? 0) > (max ?? double.infinity))) {
-              throw FormatException(
-                  "children min(${_childrenLength!.min ?? 0}) > "
-                      "parent max(${max ?? double.infinity})");
+          if (_childrenLength != null) {
+            if (_childrenTotal!.isRange) {
+              if (((_childrenTotal.min ?? 0) > (max ?? double.infinity))) {
+                throw FormatException(
+                    "children min(${_childrenTotal.min ?? 0}) > "
+                    "parent max(${max ?? double.infinity})");
+              }
+
+              if (((_childrenTotal.max ?? double.infinity) < (min ?? 0))) {
+                throw FormatException(
+                    "children max(${_childrenTotal.max ?? double.infinity})"
+                    " < parent min(${(min ?? 0)})");
+              }
             }
 
-            if (((_childrenLength!.max ?? double.infinity) < (min ?? 0))) {
-              throw FormatException(
-                  "children max(${_childrenLength!.max ?? double.infinity})"
-                      " < parent min(${(min ?? 0)})");
-            }
-          }
+            ///------------
+            else {
+              var cLen = _childrenTotal.length!;
+              if (cLen > (max ?? double.infinity)) {
+                throw FormatException("children length($cLen) >"
+                    " parent max(${max ?? double.infinity})");
+              }
 
-          ///------------
-          else {
-            var cLen = _childrenLength!.length!;
-            if (cLen > (max ?? double.infinity)) {
-              throw FormatException("children length($cLen) >"
-                  " parent max(${max ?? double.infinity})");
-            }
-
-            if (cLen < (min ?? 0)) {
-              if (!haveNotHaveLength) {
-                throw FormatException("children length($cLen)"
-                    " < parent min(${min ?? 0})");
+              if (cLen < (min ?? 0)) {
+                if (!_childrenLength!.getNotHaveLenIndexes.isNotEmpty) {
+                  throw FormatException("children length($cLen)"
+                      " < parent min(${min ?? 0})");
+                }
               }
             }
           }
         } else {
           var len = length!;
-          if (_childrenLength == null) {
-          } else if (_childrenLength!.isRange) {
-            if ((_childrenLength!.max ?? double.infinity) < len) {
-              throw FormatException("parent length($len) >"
-                  " children max(${_childrenLength!.max ?? double.infinity})");
-            }
+          if (_childrenTotal != null) {
+            if (_childrenTotal.isRange) {
+              if ((_childrenTotal.max ?? double.infinity) < len) {
+                throw FormatException("parent length($len) >"
+                    " children max(${_childrenTotal.max ?? double.infinity})");
+              }
 
-            if (len < (_childrenLength!.min ?? 0)) {
-              throw FormatException("parent length($len) <"
-                  " children min(${_childrenLength!.min ?? 0})");
-            }
-          } else {
-            if (_childrenLength!.length != length) {
-              if (!haveNotHaveLength) {
-                throw FormatException("parent length($length) != "
-                    "children length(${_childrenLength!.length})");
+              if (len < (_childrenTotal.min ?? 0)) {
+                throw FormatException("parent length($len) <"
+                    " children min(${_childrenTotal.min ?? 0})");
+              }
+            } else {
+              if (_childrenTotal.length != length) {
+                if (_childrenLength!.getNotHaveLenIndexes.isEmpty) {
+                  throw FormatException("parent length($length) != "
+                      "children length(${_childrenTotal.length})");
+                }
               }
             }
           }
@@ -701,8 +674,8 @@ mixin EndsMixin on Option {
 
     var childHaveSame = child._options.values
         .where((e) =>
-    e is EndsMixin &&
-        (isStartOption ? e.isStartOption : !e.isStartOption))
+            e is EndsMixin &&
+            (isStartOption ? e.isStartOption : !e.isStartOption))
         .isNotEmpty;
     if (childHaveSame) {
       throw FormatException("There is end option on parent already");

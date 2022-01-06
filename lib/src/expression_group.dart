@@ -17,7 +17,6 @@ mixin ExpressionGroup on RandomExpression {
 
       childrenLenMatrix = LengthMatrix.fromChildren(expressions);
 
-
       if (!global) {
         if (length == null) {
           if (childrenLenMatrix.childrenHaveLength) {
@@ -54,12 +53,23 @@ mixin ExpressionGroup on RandomExpression {
 
   bool get onGenerateLengthForEach;
 
-  int _getLen(RandomDelegate delegate) {
+  int _getLen(RandomDelegate delegate, [int? l]) {
+
     int len;
     LengthOption? childrenLength;
+
+
+
     var thisLen = length;
+
+    if (l != null && thisLen != null) {
+      thisLen.length = l;
+      thisLen.min = null;
+      thisLen.max = null;
+    }
+
     if (thisLen != null) {
-      childrenLength = thisLen._childrenLength;
+      childrenLength = thisLen._childrenLength!.getChildrenLenMerge();
 
       /// this has len
       if (thisLen.isRange) {
@@ -78,13 +88,14 @@ mixin ExpressionGroup on RandomExpression {
           /// this range, child fix
           len = childrenLength.length!;
         }
-      } else {
+      }
+      else {
         /// this fixed
         len = thisLen.length!;
       }
     } else {
       if (!childrenLenMatrix.childrenHaveLength) {
-        len = expressions.length;
+        len = l ?? expressions.length;
       } else {
         childrenLength = childrenLenMatrix.getChildrenLenMerge()!;
 
@@ -102,21 +113,16 @@ mixin ExpressionGroup on RandomExpression {
     return len;
   }
 
-  void _setChildrenLen(RandomDelegate delegate) {
+  void _setChildrenLen(RandomDelegate delegate, int? le) {
     if (onGenerateLengthForEach || !_childrenSet) {
-      if (_childrenSet) {
-        ///check length is fixed for all
-      }
-
       /// check children have range -
       /// and have not max
       /// and this have not length or max
       /// define default max
 
-      var len = _getLen(delegate);
 
+      var len = _getLen(delegate, le);
       int total = 0;
-
       total = childrenLenMatrix._setFixedLenChildren(length);
 
       var checked = 0;
@@ -157,7 +163,6 @@ mixin ExpressionGroup on RandomExpression {
         } else {
           /// children not have any length
           var dif = len - total;
-
 
           var not = childrenLenMatrix.getNotHaveLenIndexes;
           var count = not.length;
@@ -207,29 +212,36 @@ mixin ExpressionGroup on RandomExpression {
 
       assert(total == len, "total($total) == len($len) is not true");
 
+      var a = 0;
+      while(a < expressions.length){
+        if (global) {
+          if (expressions[a] is ExpressionGroup){
+            if (expressions[a].length != null) {
+              expressions[a].length!.max = null;
+              expressions[a].length!.min = null;
+              expressions[a].length!.length = childrenLenMatrix.len(a);
+            }
+          }
+        }
+        a++;
+      }
       _childrenSet = true;
     }
   }
 
   String _generate(RandomDelegate delegate) {
-    _setChildrenLen(delegate);
+    _setChildrenLen(delegate, null);
     if (global) {
       var res = <String>[];
       var i = 0;
       while (i < expressions.length) {
-        var ends = i == 0
-            ? option<StartOption>()
-            : i == expressions.length - 1
-                ? option<EndOption>()
-                : null;
-        var notEnds = i == 0
-            ? option<NotStartOption>()
-            : i == expressions.length - 1
-                ? option<NotEndOption>()
-                : null;
 
         res.add(expressions[i]._sample(delegate, childrenLenMatrix.len(i)!,
-            endOption: ends, notEndOption: notEnds));
+            notStartOption: i == 0 ? option<NotStartOption>() : null,
+            endOption: i == expressions.length - 1 ? option<EndOption>() : null,
+            startWith: i == 0 ? option<StartOption>() : null,
+            notEndOption:
+                i == expressions.length - 1 ? option<NotEndOption>() : null));
         i++;
       }
       return res.join();
@@ -257,6 +269,9 @@ mixin ExpressionGroup on RandomExpression {
         }
 
         switch (char) {
+          case " ":
+            i++;
+            break;
           case ".":
             addCharacterExpression(AllCharacters());
             break;
@@ -279,7 +294,7 @@ mixin ExpressionGroup on RandomExpression {
             addCharacterExpression(UrlCharacters());
             break;
           case "[":
-            var end = rawExpression.indexOf("]");
+            var end = rawExpression.indexOf("]", i);
             if (end == -1) {
               throw FormatException("[ not closed");
             }

@@ -40,6 +40,27 @@ List<String> asciiRange(int start, int end) {
 abstract class CharacterClass {
   const CharacterClass();
 
+  static CharacterClass? instanceFor(String character) {
+    switch (character) {
+      case ".":
+        return (AllCharacters());
+      case "#":
+        return (NumberCharacters());
+      case "*":
+        return (AllLetters());
+      case "a":
+        return (LowerLetters());
+      case "A":
+        return (UpperLetters());
+      case "s":
+        return (SpecificCharacters());
+      case "w":
+        return (UrlCharacters());
+    }
+
+    return null;
+  }
+
   List<String> get characters;
 
   @override
@@ -117,10 +138,12 @@ class NumberCharacters extends CharacterClass {
 }
 
 class SpecificCharacters extends CharacterClass {
-  const SpecificCharacters();
+  SpecificCharacters();
 
   @override
-  List<String> get characters => upperCaseLetters;
+  List<String> get characters => _chars;
+
+  final _chars = specificCharacter;
 
   @override
   bool contains(CharacterClass other) {
