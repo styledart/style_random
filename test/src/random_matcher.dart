@@ -1,31 +1,123 @@
 import 'package:style_random/random_dart.dart';
 import 'package:test/test.dart';
 
-class RandomStartWithMatcher extends RandomMatcher {
-  RandomStartWithMatcher(this.startWith, int sampleCount)
-      : super(sampleCount, 1);
+/// Check sample starting with character or character classes on
+/// 1000(default) sample
+Matcher startWith(
+    {List<CharacterClass>? classes,
+    List<String>? characters,
+    int sampleCount = 1000}) {
+  return _RandomEndsMatcher(
+      must: true,
+      start: true,
+      characters: characters ?? [],
+      sampleCount: sampleCount,
+      classes: classes ?? []);
+}
 
-  List<CharacterClass> startWith;
+/// Check sample ending with character or character classes on
+/// 1000(default) sample
+Matcher endWith(
+    {List<CharacterClass>? classes,
+    List<String>? characters,
+    int sampleCount = 1000}) {
+  return _RandomEndsMatcher(
+      must: true,
+      start: false,
+      characters: characters ?? [],
+      sampleCount: sampleCount,
+      classes: classes ?? []);
+}
+
+/// Check sample not starting with character or character classes on
+/// 1000(default) sample
+Matcher notStartWith(
+    {List<CharacterClass>? classes,
+    List<String>? characters,
+    int sampleCount = 1000}) {
+  return _RandomEndsMatcher(
+      must: false,
+      start: true,
+      characters: characters ?? [],
+      sampleCount: sampleCount,
+      classes: classes ?? []);
+}
+
+/// Check sample not ending with character or character classes on
+/// 1000(default) sample
+Matcher notEndingWith(
+    {List<CharacterClass>? classes,
+    List<String>? characters,
+    int sampleCount = 1000}) {
+  return _RandomEndsMatcher(
+      must: false,
+      start: false,
+      characters: characters ?? [],
+      sampleCount: sampleCount,
+      classes: classes ?? []);
+}
+
+class _RandomEndsMatcher extends RandomMatcher {
+  _RandomEndsMatcher(
+      {required this.must,
+      required this.start,
+      this.classes = const [],
+      this.characters = const [],
+      int sampleCount = 1000})
+      : assert(classes.isNotEmpty || characters.isNotEmpty),
+        super(sampleCount, 1);
+
+  /// character classes
+  List<CharacterClass> classes;
+
+  /// characters
+  List<String> characters;
+
+  /// is about starting point
+  bool start;
+
+  /// is about must be
+  bool must;
 
   @override
   String describeExpected() {
-    return "Starting with ${startWith.map((e) => e.runtimeType).join(" or ")}";
+    return "${must ? "" : "Not"} ${start ? "Starting" : "Ending"}"
+        " with ${classes.map((e) => e.runtimeType).join(" or ")}"
+        " or $characters";
   }
 
   @override
   bool sampleMatches(item, Map<dynamic, dynamic> matchState) {
     if (item is String) {
-      for (var c in startWith) {
-        if (c.characters.contains(item[0])) {
-          return true;
+      String c;
+
+      if (start) {
+        c = item[0];
+      } else {
+        c = item[item.length - 1];
+      }
+
+      bool contains = false;
+
+      if (characters.contains(c)) {
+        contains = true;
+      }
+
+      for (var cl in classes) {
+        if (contains && !must) break;
+        if (cl.characters.contains(c)) {
+          contains = true;
         }
       }
-    }
 
+
+      return must ? contains : !contains;
+    }
     return false;
   }
 }
 
+///
 Matcher lengthIs({int? max, int? min, int? len, int count = 1000}) {
   if (len != null) {
     assert(max == null && min == null);

@@ -37,9 +37,12 @@ List<String> asciiRange(int start, int end) {
   return l;
 }
 
+/// A Character class
 abstract class CharacterClass {
+  /// A Character class
   const CharacterClass();
 
+  /// A Character class's characters
   List<String> get characters;
 
   @override
@@ -50,14 +53,18 @@ abstract class CharacterClass {
   @override
   int get hashCode => runtimeType.hashCode;
 
+  /// contains another class
   bool contains(CharacterClass other);
 }
 
+/// A Character class
 class AllCharacters extends CharacterClass {
-  const AllCharacters();
+  AllCharacters();
 
   @override
-  List<String> get characters => allCharacters;
+  List<String> get characters => _allCharacters;
+
+  final _allCharacters = allCharacters;
 
   @override
   bool contains(CharacterClass other) {
@@ -65,11 +72,15 @@ class AllCharacters extends CharacterClass {
   }
 }
 
+/// ASCII 33, 127
 class AllLetters extends CharacterClass {
-  const AllLetters();
+  /// ASCII 33, 127
+  AllLetters();
 
   @override
-  List<String> get characters => letters;
+  List<String> get characters => _letters;
+
+  final _letters = letters;
 
   @override
   bool contains(CharacterClass other) {
@@ -81,10 +92,12 @@ class AllLetters extends CharacterClass {
 }
 
 class LowerLetters extends CharacterClass {
-  const LowerLetters();
+  LowerLetters();
 
   @override
-  List<String> get characters => lowerCaseLetters;
+  List<String> get characters => _lowerCaseLetters;
+
+  final _lowerCaseLetters = lowerCaseLetters;
 
   @override
   bool contains(CharacterClass other) {
@@ -93,10 +106,12 @@ class LowerLetters extends CharacterClass {
 }
 
 class UpperLetters extends CharacterClass {
-  const UpperLetters();
+  UpperLetters();
 
   @override
-  List<String> get characters => upperCaseLetters;
+  List<String> get characters => _upperCaseLetters;
+
+  final _upperCaseLetters = upperCaseLetters;
 
   @override
   bool contains(CharacterClass other) {
@@ -105,10 +120,12 @@ class UpperLetters extends CharacterClass {
 }
 
 class NumberCharacters extends CharacterClass {
-  const NumberCharacters();
+  NumberCharacters();
 
   @override
-  List<String> get characters => numbers;
+  List<String> get characters => _numbers;
+
+  final _numbers = numbers;
 
   @override
   bool contains(CharacterClass other) {
@@ -117,10 +134,12 @@ class NumberCharacters extends CharacterClass {
 }
 
 class SpecificCharacters extends CharacterClass {
-  const SpecificCharacters();
+  SpecificCharacters();
 
   @override
-  List<String> get characters => upperCaseLetters;
+  List<String> get characters => _chars;
+
+  final _chars = specificCharacter;
 
   @override
   bool contains(CharacterClass other) {
@@ -130,9 +149,9 @@ class SpecificCharacters extends CharacterClass {
 
 class UrlCharacters extends CharacterClass {
   @override
-  List<String> get characters {
-    return ["!", "'", "(", ")", "*", "-", ".", "_"];
-  }
+  List<String> get characters => _chars;
+
+  final _chars = ["!", "'", "(", ")", "*", "-", ".", "_"];
 
   @override
   bool contains(CharacterClass other) {

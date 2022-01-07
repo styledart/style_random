@@ -1,10 +1,15 @@
 part of 'random_dart_base.dart';
 
+/// Expression or global option.
+///
 abstract class Option {
+  /// Don't use
   Option();
 
   void _buildOption();
 
+  /// Options from name and params
+  /// E.g `"l" , ["10"]`
   factory Option.from(String name, List<String> params) {
     try {
       Option _set(Option option) {
@@ -40,9 +45,13 @@ abstract class Option {
     }
   }
 
+  /// Option name without "/"
   late final String name;
+
+  /// Option params as List<String>
   late final List<String> params;
 
+  /// Option description as Json
   Map<String, dynamic> description() {
     return {"option": name, "params": params};
   }
@@ -50,12 +59,16 @@ abstract class Option {
   void _check(RandomExpression? parent, List<RandomExpression>? children);
 }
 
-///
+/// Limit duplication
+/// Not built, Do not use
+@experimental
 class DuplicateOption extends Option {
   int? _max;
 
+  /// Maximum duplication
   int get max => _max!;
 
+  /// Set maximum duplication
   set max(int value) {
     if (name == "u") {
       _max = 1;
@@ -104,11 +117,16 @@ class DuplicateOption extends Option {
   }
 }
 
+/// Limit consecutive duplication
+/// Not built, Do not use
+@experimental
 class ConsecutiveOptions extends Option {
   int? _max;
 
+  /// Maximum duplication
   int get max => _max!;
 
+  /// Set maximum duplication
   set max(int value) => _max = value;
 
   @override
@@ -146,11 +164,13 @@ class ConsecutiveOptions extends Option {
   }
 }
 
-class LengthMatrix {
-  LengthMatrix({required List<List<int?>> matrix})
+/// Length matrix for children
+class _LengthMatrix {
+  ///
+  _LengthMatrix({required List<List<int?>> matrix})
       : _childrenLenMatrix = matrix;
 
-  factory LengthMatrix.fromChildren(List<RandomExpression> expressions) {
+  factory _LengthMatrix.fromChildren(List<RandomExpression> expressions) {
     List<List<int?>> _childrenLenMatrix = List.generate(
         6, (i) => List<int?>.generate(expressions.length, (i) => null));
 
@@ -159,12 +179,12 @@ class LengthMatrix {
       if (exp is StaticExpression) {
         _addTo(_childrenLenMatrix, i, null, null, 1);
       } else {
-        var l = expressions[i].length;
+        var l = expressions[i].option<LengthOption>();
         _addTo(_childrenLenMatrix, i, l?.min, l?.max, l?.length);
       }
       i++;
     }
-    return LengthMatrix(matrix: _childrenLenMatrix);
+    return _LengthMatrix(matrix: _childrenLenMatrix);
   }
 
   @override
@@ -173,7 +193,7 @@ class LengthMatrix {
     return "";
   }
 
-  void resetRangeProcessed() {
+  void _resetRangeProcessed() {
     _childrenLenMatrix[5] = _childrenLenMatrix[5].map((e) {
       if (e == 1) return 0;
       return null;
@@ -266,22 +286,28 @@ class LengthMatrix {
   int _setFixedLenChildren(LengthOption? lengthOption) {
     int i = 0;
     var total = 0;
+
     while (i < length) {
       if (!hasLengthOption(i)) {
-        if (lengthOption == null || lengthOption.length != null) {
+        /// hasn't length option
+        if (lengthOption == null) {
           _childrenLenMatrix[2][i] = 1;
-        } else {
+        }
+        /*else if (lengthOption.length != null){
+
+        } */
+        /*     else {
           _childrenLenMatrix[0][i] = 1;
           _childrenLenMatrix[1][i] = lengthOption.max;
           _childrenLenMatrix[4][i] = 1;
-        }
+        }*/
       }
 
       if (len(i) != null) {
         total += len(i)!;
       }
 
-      if (min(i) != null) {
+      if (lengthOption == null && min(i) != null) {
         _childrenLenMatrix[2][i] = min(i);
         total += min(i)!;
       }
@@ -327,6 +353,7 @@ class LengthMatrix {
   LengthOption? getChildrenLenMerge() {
     int? _len, _min, _max;
 
+    var maxInf = false;
     var haveNotHaveLength = false;
     var haveRange = false;
 
@@ -339,7 +366,7 @@ class LengthMatrix {
           _min = _min + (min(i) ?? 0);
 
           if (max(i) == null) {
-            haveNotHaveLength = true;
+            maxInf = true;
           } else {
             _max ??= 0;
             _max += max(i)!;
@@ -352,16 +379,19 @@ class LengthMatrix {
           _max ??= 0;
           _max += len(i)!;
         }
+      } else {
+        haveNotHaveLength = true;
       }
       i++;
     }
+
     return LengthOption(
-        length: haveRange ? null : _len,
-        min: haveRange ? (_min ?? 0) : null,
+        length: haveRange || haveNotHaveLength ? null : _len,
+        min: haveRange || haveNotHaveLength ? (_min ?? 0) : null,
         max: haveRange
-            ? haveNotHaveLength
-            ? null
-            : _max
+            ? haveNotHaveLength || maxInf
+                ? null
+                : _max
             : null);
   }
 
@@ -386,7 +416,7 @@ class LengthMatrix {
     _childrenLenMatrix[2][i] = _len;
     _childrenLenMatrix[3][i] = _len != null ? 0 : 1;
     _childrenLenMatrix[4][i] =
-    _len == null && _min == null && _max == null ? 0 : 1;
+        _len == null && _min == null && _max == null ? 0 : 1;
   }
 
   ///   0     1    2       3         4            5
@@ -394,9 +424,11 @@ class LengthMatrix {
   List<List<int?>> _childrenLenMatrix;
 }
 
+/// Length option expression
 class LengthOption extends Option {
   LengthOption._();
 
+  /// Do not use
   LengthOption({int? length, int? min, int? max}) {
     name = "l";
     params = [];
@@ -413,9 +445,9 @@ class LengthOption extends Option {
     }
   }
 
-  LengthOption? _childrenLength;
+  _LengthMatrix? _childrenLength;
 
-  bool get maxBounded {
+  bool get _maxBounded {
     return length != null || max != null;
   }
 
@@ -423,108 +455,69 @@ class LengthOption extends Option {
   void _check(RandomExpression? parent, List<RandomExpression>? children) {
     try {
       ///1
-      bool haveNotHaveLength = true;
+
       if (children == null) {
-        _childrenLength = LengthOption(min: 0, max: null);
+        _childrenLength = null;
       } else {
-        int? _len, _min, _max;
-
-        var haveLenExpressions = (children)
-            .map((element) => element.length)
-            .where((element) => element != null)
-            .cast<LengthOption>();
-
-        if (haveLenExpressions.isEmpty) {
-          _childrenLength = LengthOption(min: 0, max: null);
-        } else {
-          haveNotHaveLength = (children).length != haveLenExpressions.length;
-          var haveRange = false;
-          for (var opt in haveLenExpressions) {
-            if (opt.isRange) {
-              haveRange = true;
-              _min ??= 0;
-              _min = _min + (opt.min ?? 0);
-
-              if (opt.max == null) {
-                haveNotHaveLength = true;
-              } else {
-                _max ??= 0;
-                _max += opt.max!;
-              }
-            } else {
-              _min ??= 0;
-              _min += opt.length!;
-              _len ??= 0;
-              _len += opt.length!;
-              _max ??= 0;
-              _max += opt.length!;
-            }
-          }
-
-          _childrenLength = LengthOption(
-              length: haveRange ? null : _len,
-              min: haveRange ? (_min ?? 0) : null,
-              max: haveRange
-                  ? haveNotHaveLength
-                  ? null
-                  : _max
-                  : null);
-        }
+        _childrenLength = _LengthMatrix.fromChildren(children);
       }
+      var _childrenTotal = _childrenLength!.getChildrenLenMerge();
 
       ///e1
 
       ///2
       try {
         if (isRange) {
-          if (_childrenLength == null) {
-          } else if (_childrenLength!.isRange) {
-            if (((_childrenLength!.min ?? 0) > (max ?? double.infinity))) {
-              throw FormatException(
-                  "children min(${_childrenLength!.min ?? 0}) > "
-                      "parent max(${max ?? double.infinity})");
+          if (_childrenLength != null) {
+            if (_childrenTotal!.isRange) {
+              if (((_childrenTotal.min ?? 0) > (max ?? double.infinity))) {
+                throw FormatException(
+                    "children min(${_childrenTotal.min ?? 0}) > "
+                    "parent max(${max ?? double.infinity})");
+              }
+
+              if (((_childrenTotal.max ?? double.infinity) < (min ?? 0))) {
+                throw FormatException(
+                    "children max(${_childrenTotal.max ?? double.infinity})"
+                    " < parent min(${(min ?? 0)})");
+              }
             }
 
-            if (((_childrenLength!.max ?? double.infinity) < (min ?? 0))) {
-              throw FormatException(
-                  "children max(${_childrenLength!.max ?? double.infinity})"
-                      " < parent min(${(min ?? 0)})");
-            }
-          }
+            ///------------
+            else {
+              var cLen = _childrenTotal.length!;
+              if (cLen > (max ?? double.infinity)) {
+                throw FormatException("children length($cLen) >"
+                    " parent max(${max ?? double.infinity})");
+              }
 
-          ///------------
-          else {
-            var cLen = _childrenLength!.length!;
-            if (cLen > (max ?? double.infinity)) {
-              throw FormatException("children length($cLen) >"
-                  " parent max(${max ?? double.infinity})");
-            }
-
-            if (cLen < (min ?? 0)) {
-              if (!haveNotHaveLength) {
-                throw FormatException("children length($cLen)"
-                    " < parent min(${min ?? 0})");
+              if (cLen < (min ?? 0)) {
+                if (!_childrenLength!.getNotHaveLenIndexes.isNotEmpty) {
+                  throw FormatException("children length($cLen)"
+                      " < parent min(${min ?? 0})");
+                }
               }
             }
           }
         } else {
           var len = length!;
-          if (_childrenLength == null) {
-          } else if (_childrenLength!.isRange) {
-            if ((_childrenLength!.max ?? double.infinity) < len) {
-              throw FormatException("parent length($len) >"
-                  " children max(${_childrenLength!.max ?? double.infinity})");
-            }
+          if (_childrenTotal != null) {
+            if (_childrenTotal.isRange) {
+              if ((_childrenTotal.max ?? double.infinity) < len) {
+                throw FormatException("parent length($len) >"
+                    " children max(${_childrenTotal.max ?? double.infinity})");
+              }
 
-            if (len < (_childrenLength!.min ?? 0)) {
-              throw FormatException("parent length($len) <"
-                  " children min(${_childrenLength!.min ?? 0})");
-            }
-          } else {
-            if (_childrenLength!.length != length) {
-              if (!haveNotHaveLength) {
-                throw FormatException("parent length($length) != "
-                    "children length(${_childrenLength!.length})");
+              if (len < (_childrenTotal.min ?? 0)) {
+                throw FormatException("parent length($len) <"
+                    " children min(${_childrenTotal.min ?? 0})");
+              }
+            } else {
+              if (_childrenTotal.length != length) {
+                if (_childrenLength!.getNotHaveLenIndexes.isEmpty) {
+                  throw FormatException("parent length($length) != "
+                      "children length(${_childrenTotal.length})");
+                }
               }
             }
           }
@@ -539,10 +532,16 @@ class LengthOption extends Option {
     }
   }
 
+  /// Max length
   int? max;
+
+  /// Min length
   int? min;
+
+  /// Fixed length
   int? length;
 
+  /// The option is range option
   bool get isRange => max != null || min != null;
 
   @override
@@ -577,10 +576,11 @@ class LengthOption extends Option {
   }
 }
 
-mixin EndsMixin on Option {
-  List<CharacterClass>? classes;
+/// End options
+mixin _EndsMixin on Option {
+  List<CharacterClass>? _classes;
 
-  List<String>? characters;
+  List<String>? _characters;
 
   _build() {
     if (params.isEmpty) {
@@ -641,25 +641,25 @@ mixin EndsMixin on Option {
     }
 
     if (cl.isNotEmpty) {
-      classes = cl;
+      _classes = cl;
     }
 
     if (ch.isNotEmpty) {
-      characters = ch;
+      _characters = ch;
     }
   }
 
-  bool get isStartOption;
+  bool get _isStartOption;
 
-  bool get must;
+  bool get _must;
 
   bool contains(String char) {
     assert(char.length == 1);
-    if (characters != null) {
-      return characters!.contains(char);
+    if (_characters != null) {
+      return _characters!.contains(char);
     }
 
-    for (var cl in classes!) {
+    for (var cl in _classes!) {
       if (cl.characters.contains(char)) return true;
     }
 
@@ -668,15 +668,15 @@ mixin EndsMixin on Option {
 
   bool availableAt(String char, bool start) {
     bool? res;
-    if (start && isStartOption) {
+    if (start && _isStartOption) {
       res = contains(char.split("").first);
     }
-    if (!start && !isStartOption) {
+    if (!start && !_isStartOption) {
       res = contains(char.split("").last);
     }
 
     if (res != null) {
-      if (must) {
+      if (_must) {
         return res;
       } else {
         return !res;
@@ -693,7 +693,7 @@ mixin EndsMixin on Option {
 
     RandomExpression child;
 
-    if (isStartOption) {
+    if (_isStartOption) {
       child = children.first;
     } else {
       child = children.last;
@@ -701,8 +701,8 @@ mixin EndsMixin on Option {
 
     var childHaveSame = child._options.values
         .where((e) =>
-    e is EndsMixin &&
-        (isStartOption ? e.isStartOption : !e.isStartOption))
+            e is _EndsMixin &&
+            (_isStartOption ? e._isStartOption : !e._isStartOption))
         .isNotEmpty;
     if (childHaveSame) {
       throw FormatException("There is end option on parent already");
@@ -713,8 +713,8 @@ mixin EndsMixin on Option {
     if (child is ExpressionGroup) {
       for (var exp in child.expressions) {
         if (exp is CharacterClassExpression) {
-          for (var cl in classes ?? <CharacterClass>[]) {
-            if (!(con) && must) {
+          for (var cl in _classes ?? <CharacterClass>[]) {
+            if (!(con) && _must) {
               if (exp.charClass.contains(cl)) {
                 con = true;
               }
@@ -723,8 +723,8 @@ mixin EndsMixin on Option {
             }
           }
 
-          for (var ch in characters ?? <String>[]) {
-            if (!(con) && must) {
+          for (var ch in _characters ?? <String>[]) {
+            if (!(con) && _must) {
               if (exp.charClass.characters.contains(ch)) {
                 con = true;
               }
@@ -735,8 +735,8 @@ mixin EndsMixin on Option {
         }
       }
     } else if (child is CharacterClassExpression) {
-      for (var cl in classes ?? <CharacterClass>[]) {
-        if (!con && must) {
+      for (var cl in _classes ?? <CharacterClass>[]) {
+        if (!con && _must) {
           if (child.charClass.contains(cl)) {
             con = true;
           }
@@ -745,8 +745,8 @@ mixin EndsMixin on Option {
         }
       }
 
-      for (var ch in characters ?? <String>[]) {
-        if (!con && must) {
+      for (var ch in _characters ?? <String>[]) {
+        if (!con && _must) {
           if (child.charClass.characters.contains(ch)) {
             con = true;
           }
@@ -755,7 +755,7 @@ mixin EndsMixin on Option {
         }
       }
     }
-    if (!con && must) {
+    if (!con && _must) {
       throw FormatException("Classes not "
           "contains in a group or expression. So starting with"
           " is impossible");
@@ -768,7 +768,8 @@ mixin EndsMixin on Option {
   }
 }
 
-class NotStartOption extends Option with EndsMixin {
+/// Expression not start with option
+class NotStartOption extends Option with _EndsMixin {
   @override
   void _buildOption() {
     _build();
@@ -780,13 +781,14 @@ class NotStartOption extends Option with EndsMixin {
   }
 
   @override
-  bool get isStartOption => true;
+  bool get _isStartOption => true;
 
   @override
-  bool get must => false;
+  bool get _must => false;
 }
 
-class NotEndOption extends Option with EndsMixin {
+/// Expression not end with option
+class NotEndOption extends Option with _EndsMixin {
   @override
   void _buildOption() {
     _build();
@@ -798,13 +800,14 @@ class NotEndOption extends Option with EndsMixin {
   }
 
   @override
-  bool get isStartOption => false;
+  bool get _isStartOption => false;
 
   @override
-  bool get must => false;
+  bool get _must => false;
 }
 
-class StartOption extends Option with EndsMixin {
+/// Expression start with option
+class StartOption extends Option with _EndsMixin {
   @override
   void _buildOption() {
     _build();
@@ -816,13 +819,14 @@ class StartOption extends Option with EndsMixin {
   }
 
   @override
-  bool get isStartOption => true;
+  bool get _isStartOption => true;
 
   @override
-  bool get must => true;
+  bool get _must => true;
 }
 
-class EndOption extends Option with EndsMixin {
+/// Expression end with option
+class EndOption extends Option with _EndsMixin {
   @override
   void _buildOption() {
     _build();
@@ -834,8 +838,8 @@ class EndOption extends Option with EndsMixin {
   }
 
   @override
-  bool get isStartOption => false;
+  bool get _isStartOption => false;
 
   @override
-  bool get must => false;
+  bool get _must => false;
 }

@@ -1,9 +1,38 @@
 part of 'random_dart_base.dart';
 
 mixin ExpressionGroup on RandomExpression {
+  /// The group's expressions
   final List<RandomExpression> expressions = [];
 
-  late LengthMatrix childrenLenMatrix;
+  late _LengthMatrix _childrenLenMatrix;
+
+  _setMatrix() {
+    _childrenLenMatrix = _LengthMatrix.fromChildren(expressions);
+
+    if (!_global) {
+      if (option<LengthOption>() == null) {
+        if (_childrenLenMatrix.childrenHaveLength) {
+          var l = _childrenLenMatrix.getChildrenLenMerge()!;
+          _options[LengthOption] = l;
+          l._check(this, expressions);
+        }
+      }
+    }
+
+    if (_global) {
+      var l = option<LengthOption>();
+      if (l != null) {
+        if (!l._maxBounded && _childrenLenMatrix.hasUnboundedRange) {
+          throw FormatException("max unbounded");
+        }
+      } else {
+        if (_childrenLenMatrix.hasUnboundedRange) {
+          /// this unbounded check child
+          throw FormatException("max unbounded");
+        }
+      }
+    }
+  }
 
   void _buildOptions() {
     try {
@@ -14,52 +43,40 @@ mixin ExpressionGroup on RandomExpression {
       for (var opt in options) {
         opt._check(this, expressions);
       }
-
-      childrenLenMatrix = LengthMatrix.fromChildren(expressions);
-
-
-      if (!global) {
-        if (length == null) {
-          if (childrenLenMatrix.childrenHaveLength) {
-            var l = childrenLenMatrix.getChildrenLenMerge()!;
-            _options[LengthOption] = l;
-            l._check(this, expressions);
-          }
-        }
-      }
-
-      if (global) {
-        var l = length;
-        if (l != null) {
-          if (!l.maxBounded && childrenLenMatrix.hasUnboundedRange) {
-            throw FormatException("max unbounded");
-          }
-        } else {
-          if (childrenLenMatrix.hasUnboundedRange) {
-            /// this unbounded check child
-            throw FormatException("max unbounded");
-          }
-        }
-      }
+      _setMatrix();
     } on Exception {
       rethrow;
     }
   }
 
   ///
-  bool get global;
+  bool get _global;
 
   ///
   bool _childrenSet = false;
 
+  /// If the range is used as the length, the generator randomly determines the
+  /// lengths in these intervals when it is built.
+  ///
+  /// This means that all results will be of the same length. But if you want
+  /// the length to be re-selected for each instance (with some performance
+  /// degradation), then onGenerateLength: true should be.
   bool get onGenerateLengthForEach;
 
-  int _getLen(RandomDelegate delegate) {
+  int _getLen(RandomDelegate delegate, [int? l]) {
     int len;
     LengthOption? childrenLength;
-    var thisLen = length;
+
+    var thisLen = option<LengthOption>();
+
+    if (l != null && thisLen != null) {
+      thisLen.length = l;
+      thisLen.min = null;
+      thisLen.max = null;
+    }
+
     if (thisLen != null) {
-      childrenLength = thisLen._childrenLength;
+      childrenLength = thisLen._childrenLength!.getChildrenLenMerge();
 
       /// this has len
       if (thisLen.isRange) {
@@ -83,10 +100,10 @@ mixin ExpressionGroup on RandomExpression {
         len = thisLen.length!;
       }
     } else {
-      if (!childrenLenMatrix.childrenHaveLength) {
-        len = expressions.length;
+      if (!_childrenLenMatrix.childrenHaveLength) {
+        len = l ?? expressions.length;
       } else {
-        childrenLength = childrenLenMatrix.getChildrenLenMerge()!;
+        childrenLength = _childrenLenMatrix.getChildrenLenMerge()!;
 
         /// children len unbounded
         if (childrenLength.isRange) {
@@ -102,10 +119,10 @@ mixin ExpressionGroup on RandomExpression {
     return len;
   }
 
-  void _setChildrenLen(RandomDelegate delegate) {
+  void _setChildrenLen(RandomDelegate delegate, int? le) {
     if (onGenerateLengthForEach || !_childrenSet) {
-      if (_childrenSet) {
-        ///check length is fixed for all
+      if (onGenerateLengthForEach) {
+        _setMatrix();
       }
 
       /// check children have range -
@@ -113,23 +130,22 @@ mixin ExpressionGroup on RandomExpression {
       /// and this have not length or max
       /// define default max
 
-      var len = _getLen(delegate);
+      var len = _getLen(delegate, le);
 
       int total = 0;
-
-      total = childrenLenMatrix._setFixedLenChildren(length);
+      total = _childrenLenMatrix._setFixedLenChildren(option<LengthOption>());
 
       var checked = 0;
-      while (total < len && childrenLenMatrix.haveNotProcessed) {
+      while (total < len && _childrenLenMatrix.haveNotProcessed) {
         /// steps
         /// 1 - check ranges
         /// 2 - check all not length.
 
-        int? firstRangeIndex = childrenLenMatrix.getFirstNotProcessedRange;
+        int? firstRangeIndex = _childrenLenMatrix.getFirstNotProcessedRange;
 
         if (firstRangeIndex != null) {
-          var mi = childrenLenMatrix.min(firstRangeIndex);
-          var ma = childrenLenMatrix.max(firstRangeIndex);
+          var mi = _childrenLenMatrix.min(firstRangeIndex);
+          var ma = _childrenLenMatrix.max(firstRangeIndex);
           int _m;
           if (ma != null) {
             _m = ma;
@@ -152,14 +168,14 @@ mixin ExpressionGroup on RandomExpression {
             le = delegate.nextInt(minInt: mi, maxInt: _m);
           }
 
-          childrenLenMatrix.addLength(firstRangeIndex, le);
+          _childrenLenMatrix.addLength(firstRangeIndex, le);
           total += le;
         } else {
           /// children not have any length
           var dif = len - total;
 
+          var not = _childrenLenMatrix.getNotHaveLenIndexes;
 
-          var not = childrenLenMatrix.getNotHaveLenIndexes;
           var count = not.length;
 
           if (count > 0) {
@@ -168,7 +184,7 @@ mixin ExpressionGroup on RandomExpression {
             if (each < 1) {
               var a = 0;
               while (dif > 0) {
-                childrenLenMatrix.addLength(a, 1);
+                _childrenLenMatrix.addLength(a, 1);
                 a++;
                 dif--;
                 total++;
@@ -182,7 +198,7 @@ mixin ExpressionGroup on RandomExpression {
               while (dif > 0) {
                 var inc = (c ? 1 : each);
 
-                childrenLenMatrix.addLength(not[a], inc);
+                _childrenLenMatrix.addLength(not[a], inc);
 
                 dif -= inc;
                 total += inc;
@@ -196,10 +212,10 @@ mixin ExpressionGroup on RandomExpression {
           }
         }
         checked++;
-        if (checked == childrenLenMatrix.rangeCount) {
+        if (checked == _childrenLenMatrix.rangeCount) {
           /// if total not satisfied check ranges again
           if (total != len) {
-            childrenLenMatrix.resetRangeProcessed();
+            _childrenLenMatrix._resetRangeProcessed();
             checked = 0;
           }
         }
@@ -207,29 +223,37 @@ mixin ExpressionGroup on RandomExpression {
 
       assert(total == len, "total($total) == len($len) is not true");
 
+      var a = 0;
+      while (a < expressions.length) {
+        _childrenLenMatrix._childrenLenMatrix[2][a] ??= 0;
+        if (_global) {
+          if (expressions[a] is ExpressionGroup) {
+            if (expressions[a].option<LengthOption>() != null) {
+              expressions[a].option<LengthOption>()!.max = null;
+              expressions[a].option<LengthOption>()!.min = null;
+              expressions[a].option<LengthOption>()!.length =
+                  _childrenLenMatrix.len(a);
+            }
+          }
+        }
+        a++;
+      }
       _childrenSet = true;
     }
   }
 
   String _generate(RandomDelegate delegate) {
-    _setChildrenLen(delegate);
-    if (global) {
+    _setChildrenLen(delegate, null);
+    if (_global) {
       var res = <String>[];
       var i = 0;
       while (i < expressions.length) {
-        var ends = i == 0
-            ? option<StartOption>()
-            : i == expressions.length - 1
-                ? option<EndOption>()
-                : null;
-        var notEnds = i == 0
-            ? option<NotStartOption>()
-            : i == expressions.length - 1
-                ? option<NotEndOption>()
-                : null;
-
-        res.add(expressions[i]._sample(delegate, childrenLenMatrix.len(i)!,
-            endOption: ends, notEndOption: notEnds));
+        res.add(expressions[i]._sample(delegate, _childrenLenMatrix.len(i)!,
+            notStartOption: i == 0 ? option<NotStartOption>() : null,
+            endOption: i == expressions.length - 1 ? option<EndOption>() : null,
+            startWith: i == 0 ? option<StartOption>() : null,
+            notEndOption:
+                i == expressions.length - 1 ? option<NotEndOption>() : null));
         i++;
       }
       return res.join();
@@ -257,6 +281,9 @@ mixin ExpressionGroup on RandomExpression {
         }
 
         switch (char) {
+          case " ":
+            i++;
+            break;
           case ".":
             addCharacterExpression(AllCharacters());
             break;
@@ -279,7 +306,7 @@ mixin ExpressionGroup on RandomExpression {
             addCharacterExpression(UrlCharacters());
             break;
           case "[":
-            var end = rawExpression.indexOf("]");
+            var end = rawExpression.indexOf("]", i);
             if (end == -1) {
               throw FormatException("[ not closed");
             }
@@ -324,8 +351,12 @@ mixin ExpressionGroup on RandomExpression {
                   "options. Options ignored and removed");
             }
             var sub = rawExpression.substring(i + 1, end);
-
             var exp = StaticExpression(sub);
+            if (opts.isNotEmpty) {
+              throw FormatException(
+                  "Static Expressions not handel any options");
+            }
+            exp._options[LengthOption] = LengthOption(length: sub.length);
             expressions.add(exp);
             opts.clear();
             i = end + 1;

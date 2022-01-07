@@ -1,23 +1,16 @@
 
+
 import 'package:style_random/random_dart.dart';
 
 void main() {
 
-  //TODO: Dışta sabit varken içe baktı
-
-  // RandomGenerator("/l(10)*/l(5-10)./l(10)#/l(26)").generateString();
+  var gen = RandomGenerator("/l(1-9)# /l(1-9)a /l(10)",onGenerateLength: true);
 
 
-
-  var gen = RandomGenerator("[.]/l(10)/s(#)");
-
-  print(gen.description());
-
-  print(gen.generateString());
-  print(gen.generateString());
-  print(gen.generateString());
-  print(gen.generateString());
-  print(gen.generateString());
-  print(gen.generateString());
-  print(gen.generateString());
+  print(gen.generateString()); //kalhlE6BUU-
+  print(gen.generateString()); //vtbsnC4W6Z-
+  print(gen.generateString()); //kekvaMPL3H-
+  print(gen.generateString()); //fwubz27YCA-
+  print(gen.generateString()); //oxkof7B7ZU-
+  print(gen.generateString()); //mqcguUF9WO-
 }
