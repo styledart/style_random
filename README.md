@@ -1,7 +1,9 @@
+# Style Random
+
 Random string generator with easy syntax and many complex options. Specify random template by character classes, define
 length, order by classes, add conditions like starting with, ending with or duplication.
 
-## Features
+# Features
 
 The random code generator that can be used for many needs is created with a single template. This template is parsed at
 the beginning and generates random codes suitable for all conditions.
@@ -56,7 +58,7 @@ OFKIG-54o75p7730
 EKXTQ-2lydl02b39
 ```
 
-## Syntax.
+## Syntax
 
 ![](https://github.com/Mehmetyaz/style_random/blob/master/documentation/description.png)
 
@@ -128,7 +130,6 @@ yonidUBXUC-
 
 `[a #]`  lower case letters or numbers
 
-
 ### Static Expression
 
 Static characters are expressed with `{}`. Static expressions instantiate the contents as they are.
@@ -139,8 +140,8 @@ E.g. `{-}` , `{42}` , `{xyz}`
 
 ### `/l()` Length
 
-The length option can be added anywhere. It determines the length of that expression when added to an expression, and the
-length of the entire expression when added to global options.<br>
+The length option can be added anywhere. It determines the length of that expression when added to an expression, and
+the length of the entire expression when added to global options.<br>
 The length option can take a fixed number or a range.
 
 #### Fixed
@@ -154,14 +155,16 @@ The length can be defined within a certain range.
 If a range is given as a length, the generator checks the parent-child lengths. If it is impossible, it will throw an
 error when `RandomGenerator` is defined.
 
-This impossibility arises when the **maximum** value of the child is less than the **minimum** set by the parent (for example,
-global `/l()`) for that child, etc.
+This impossibility arises when the **maximum** value of the child is less than the **minimum** set by the parent (for
+example, global `/l()`) for that child, etc.
 
 There are 3 ways of range definition:
 
 `/l(<min>-<max>)` minimum and maximum are defined.<br>
-`/l(-<max>)` maximum is defined. If there is no minimum set by parent for this expression, the minimum can be 0. So from this expression it may not be created at all. <br>
-`/l(<min>-)` minimum is defined, maximum is infinity. The length must be restricted by the parent when this expression is used. Otherwise, it will throw an error with the message "max unbounded".
+`/l(-<max>)` maximum is defined. If there is no minimum set by parent for this expression, the minimum can be 0. So from
+this expression it may not be created at all. <br>
+`/l(<min>-)` minimum is defined, maximum is infinity. The length must be restricted by the parent when this expression
+is used. Otherwise, it will throw an error with the message "max unbounded".
 
 If the range is used as the length, the generator randomly determines the lengths in these intervals when it is built.
 
@@ -172,9 +175,11 @@ The length of static expressions is always the length of the String inside.
 {mehmet} : auto add /l(6)
 ```
 
-The Length option automatically determines the length of expressions without a length specified by looking at the child parent relationships.
+The Length option automatically determines the length of expressions without a length specified by looking at the child
+parent relationships.
 
 All results in the example below conform to the same template
+
 ```text
 1. exp |      2.exp      | 3. exp | global opts
      a     /l(5)   [A#]     {-}       /l(11)
@@ -184,45 +189,49 @@ All results in the example below conform to the same template
 a        [/l(3)A/l(2)#]     {-}       /l(11)
 ```
 
-
-> If you are using it for security purposes (for example, to generate a key), preventing(or to reduce) duplication or templates whose random values are similar to each other will NOT make your key more secure. It makes it more INSECURE.
-
-
 ### End options
 
 End options specifies the conditions for the start or end(last index) of expressions.
 
 These end expressions are defined as `/option-name(classes or characters)`.
 
-It can take more than one parameter. Character class names must be direct, and specific characters must inside of `{}`. Parameters are separated by commas.
+It can take more than one parameter. Character class names must be direct, and specific characters must inside of `{}`.
+Parameters are separated by commas.
 
 For example:
 
 ``/s(a,{-},{@5c}) .`` any character (ASCII 33-126) **BUT** **must start with**;
-- `a` lower case letters<br>
-   OR
-- `{-}` the character of `-`<br>
-   OR
-- `{@5c}` characters of "@" or "5" or "c"
 
+- `a` lower case letters<br>
+  OR
+- `{-}` the character of `-`<br>
+  OR
+- `{@5c}` characters of "@" or "5" or "c"
 
 There are 4 types of end options.
 
 ##### `/s(<cl>|<char>)` Starts with
+
 ##### `/e(<cl>|<char>)` Ends with
+
 ##### `/<(<cl>|<char>)` Not start with
+
 ##### `/>(<cl>|<char>)` Not end with
+
+> If you are using it for security purposes (for example, to generate a key), preventing(or to reduce) duplication or templates whose random values are similar to each other will NOT make your key more secure. It makes it more INSECURE.
 
 #### Impossibility
 
 While the template is being built, it is checked whether this condition is possible in most cases.
 
-E.g. `/s(a) #` in the expression, generation with the condition is impossible.
-Because the condition is to create an instance from class `#`, starting from class `a`. But any `#` does not contain any `a`.
+E.g. `/s(a) #` in the expression, generation with the condition is impossible. Because the condition is to create an
+instance from class `#`, starting from class `a`. But any `#` does not contain any `a`.
 
-Many possibilities are reviewed and if there is an impossibility, an error is thrown during the build. Loops are limited to the square of the length to avoid endless loops due to missed debugging.
+Many possibilities are reviewed and if there is an impossibility, an error is thrown during the build. Loops are limited
+to the square of the length to avoid endless loops due to missed debugging.
 
-An error is thrown when these conditions conflict. If the parent has the same condition, the child is not accepted and gives an error.
+An error is thrown when these conditions conflict. If the parent has the same condition, the child is not accepted and
+gives an error.
 
 #### End Options Examples
 
@@ -230,25 +239,27 @@ An error is thrown when these conditions conflict. If the parent has the same co
 
 `/s(#)/>(s)./l(20)`  20 any character. It must start with a number and not end with a specific characters.
 
-
 ## On Generate Length
 
-If the range is used as the length, the generator randomly determines the lengths in these intervals when it is built. 
+If the range is used as the length, the generator randomly determines the lengths in these intervals when it is built.
 
-This means that all results will be of the same length. But if you want the length to be re-selected for each instance (with some performance degradation), then onGenerateLength: true should be.
+This means that all results will be of the same length. But if you want the length to be re-selected for each instance (
+with some performance degradation), then onGenerateLength: true should be.
 
 ```dart
-void main(){
-   var gen = RandomGenerator(
-           "/l(1-9)# /l(1-9)a /l(10)",
-           onGenerateLength: true
-   );
+void main() {
+  var gen = RandomGenerator(
+      "/l(1-9)# /l(1-9)a /l(10)",
+      onGenerateLength: true
+  );
 }
 ```
 
-In this example, numbers of length 1-9(random length in this range) and lowercase letters of length 1-9 are produced, orderly.
+In this example, numbers of length 1-9(random length in this range) and lowercase letters of length 1-9 are produced,
+orderly.
 
-If we want these lengths to change with each election, the result may be like this: 
+If we want these lengths to change with each election, the result may be like this:
+
 ```text
               #  a
 1402joprny    4  6
@@ -273,19 +284,40 @@ if `onGenerateLength: false` :
 
 ## Custom Random Delegate
 
+Define custom random
 
+```dart
+class CustomRandom extends RandomDelegate {
+  CustomRandom() : super();
+
+  @override
+  int nextInt(int max) {
+    return 10;
+  }
+}
+```
+
+Use
+
+```dart
+void main() {
+  var gen = RandomGenerator(
+      "a[/l(3)A/l(2)#]{-}/l(11)",
+      randomDelegate: CustomRandom()
+  );
+}
+```
 
 ## Sample templates according to usage areas
 
 [//]: # (TODO: Add more example)
 
-
 ## Features to be added
 
 - include - exclude options for character classes
 - Duplication option: limit duplications , consecutive-duplications.
-- Range option for `#`. 
+- Range option for `#`.
 - Template matches. Checking the compatibility of the given samples with the template. For secret templates.
 - Encoding-decoding with JSON.(toJson,fromJson)
-- Random template generation. It can be used to generate a template as random. 
+- Random template generation. It can be used to generate a template as random.
 - Tutorial - Demo web application like https://regexr.com/

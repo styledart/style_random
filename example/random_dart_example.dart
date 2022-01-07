@@ -1,11 +1,9 @@
-
-
 import 'package:style_random/random_dart.dart';
 
 void main() {
-
-  var gen = RandomGenerator("/l(1-9)# /l(1-9)a /l(10)",onGenerateLength: true);
-
+  var gen = RandomGenerator(
+    "a[/l(3)A/l(2)#]{-}/l(11)",
+  );
 
   print(gen.generateString()); //kalhlE6BUU-
   print(gen.generateString()); //vtbsnC4W6Z-

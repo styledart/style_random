@@ -110,7 +110,6 @@ class _RandomEndsMatcher extends RandomMatcher {
         }
       }
 
-
       return must ? contains : !contains;
     }
     return false;
