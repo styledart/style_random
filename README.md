@@ -308,7 +308,73 @@ void main() {
 }
 ```
 
-## Sample templates according to usage areas
+## Sample templates
+
+
+#### Verification Code ``/l(3)# {-} /l(3)#``
+```text
+880-282
+208-235
+239-205
+956-849
+206-311
+745-154
+```
+
+#### Short link
+
+With url available specific characters : ``[*#w]/l(30)``
+
+```text
+))T(s-U8IfA6J4((b699l((c8cR34t
+4w49!_1R3i'-.((*tvs!-Q7IdG1VtC
+l61Y27.20_7*37'3if9Rnsn85g0wAu
+!L1X!x4-1')!c8G(_U0__6R738qxhI
+4g'X'6uUT-L..49T_*n_U'17y*60Vv
+5-Q7LEA__6-6O25r36)1giH(4(.u78
+```
+
+For without specific characters: `[*#]/l(30)`
+
+
+
+#### Suggest Password ``./l(16)``
+```text
+j+kKM]DDM"ne/2<>
+(I+WHx7k@^kd^Xg^
+Bd49/`>VM:jTr"yS
+iyOQHVv]yinU7`%A
+XQyS$o&-_62;0`2_
+^[@/A#(X`If5+((M
+```
+
+#### Firebase Document ID `[*#]/l(20)`
+
+````text
+gQ9gaPh4e2J31U1CxedB
+t09R5h053T19NG0bh2uK
+W65r2UP099IDux645l8A
+Pw601wg6Tq7kb63BN36O
+f9n50Y4504B93D6LNjNV
+C65Gn41MMLX59Wl326p9
+````
+
+#### Cool Code :) `{S} ## {-} /l(4)A {-} /l(4)#`
+In codes such as appointment code, order code (even if it has no real meaning), it may be necessary to pretend that the code has a certain meaning.
+
+```text
+S45-FGJJ-5453
+S77-IRTY-5725
+S21-SLGB-9247
+S56-NBKN-3393
+S88-DAEB-6465
+S31-QNJO-1611
+```
+
+#### Phone number: `{+90 5}##{ }###{ }##{ }##`
+These numbers generated randomly!
+![](https://github.com/styledart/style_random/blob/master/documentation/phones.png)
+
 
 [//]: # (TODO: Add more example)
 

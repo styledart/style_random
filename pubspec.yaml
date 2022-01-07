@@ -1,6 +1,6 @@
 name: style_random
 description: Random string generator with easy syntax and many complex options. Specify random string by many options like length, ends etc.
-version: 0.0.1
+version: 0.0.1+1
 homepage: https://github.com/styledart/style_random
 repository: https://github.com/styledart/style_random
 
@@ -11,5 +11,5 @@ dependencies:
   meta: ^1.7.0
 
 dev_dependencies:
-  lints: ^1.0.0
-  test: ^1.16.0
+  lints: ^1.0.1
+  test: ^1.20.1

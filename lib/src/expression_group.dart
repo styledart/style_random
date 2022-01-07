@@ -107,9 +107,19 @@ mixin ExpressionGroup on RandomExpression {
 
         /// children len unbounded
         if (childrenLength.isRange) {
-          len = delegate._nextInt(
-              maxInt: childrenLength.max ?? 1 << 32,
-              minInt: childrenLength.min ?? 0);
+          if (childrenLength._maxBounded) {
+            len = delegate._nextInt(
+                maxInt: childrenLength.max ?? 1 << 32,
+                minInt: childrenLength.min ?? 0);
+          } else {
+            var l = 0;
+            var t = 0;
+            while (l < _childrenLenMatrix.length) {
+              t += _childrenLenMatrix.len(l) ?? _childrenLenMatrix.max(l) ?? 0;
+              l++;
+            }
+            len = t + _childrenLenMatrix.getNotHaveLenIndexes.length;
+          }
         } else {
           len = childrenLength.length!;
         }
