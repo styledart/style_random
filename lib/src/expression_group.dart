@@ -1,4 +1,4 @@
-part of 'random_dart_base.dart';
+part of 'style_random_base.dart';
 
 mixin ExpressionGroup on RandomExpression {
   /// The group's expressions
