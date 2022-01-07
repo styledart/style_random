@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import 'package:meta/meta.dart';
+
 part 'character_classes.dart';
 
 part 'delegate.dart';

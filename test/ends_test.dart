@@ -15,7 +15,7 @@ void main() {
 
     expect("/s(#)[.]/l(20)", startWith(classes: [NumberCharacters()]));
     expect(
-        "/s(#)/e(#)[.]/l(20)",
+        "/s(#)/e(#)./l(20)",
         allOf(endWith(classes: [NumberCharacters()]),
             startWith(classes: [NumberCharacters()])));
 

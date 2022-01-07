@@ -35,7 +35,7 @@ class RandomGenerator extends RandomExpression with ExpressionGroup {
   }
 
   @override
-  bool get global => true;
+  bool get _global => true;
 
   @override
   Map<String, dynamic> description() {
@@ -50,9 +50,9 @@ class RandomGenerator extends RandomExpression with ExpressionGroup {
   @override
   String _sample(RandomDelegate delegate, int lengthOption,
       {StartOption? startWith,
-        NotStartOption? notStartOption,
-        EndOption? endOption,
-        NotEndOption? notEndOption}) {
+      NotStartOption? notStartOption,
+      EndOption? endOption,
+      NotEndOption? notEndOption}) {
     throw UnimplementedError();
   }
 }

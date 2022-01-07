@@ -13,22 +13,31 @@ abstract class RandomExpression {
 
   final Map<Type, Option> _options = {};
 
+  /// Expression options
   List<Option> get options => _options.values.toList();
 
-  LengthOption? get length {
-    return _options[LengthOption] as LengthOption?;
-  }
-
+  /// [option] by type.
+  /// If option not exists returns null
   T? option<T extends Option>() {
     return _options[T] as T?;
   }
 
+  /// Expression built description as Json
   Map<String, dynamic> description();
 }
 
+/// `.` any character. *(ASCII 33-126)* <br>
+/// `#` any number from 0 to 9. *9 include* <br>
+/// `*` any letter. *(ASCII 65-90 and 97-122)* <br>
+/// `l` lover case letters. *(ASCII 65-90)* <br>
+/// `L` upper case letters. *(ASCII 97-122)* <br>
+/// `s` any specific character *(ASCII 33-47, 58-64, 91-96, 123-126)* <br>
+/// `w` any specific character exclude url specific characters
 class CharacterClassExpression extends RandomExpression {
+  /// Use [CharacterClass] for the constructor
   CharacterClassExpression({required this.charClass});
 
+  /// This expression's character class
   CharacterClass charClass;
 
   @override
@@ -42,7 +51,7 @@ class CharacterClassExpression extends RandomExpression {
     };
   }
 
-  bool getAvailableForEnd(EndOption? end, NotEndOption? notEnd) {
+  bool _getAvailableForEnd(EndOption? end, NotEndOption? notEnd) {
     for (var c in charClass.characters) {
       if (end?.contains(c) == true) {
         return true;
@@ -159,12 +168,14 @@ class CharacterClassExpression extends RandomExpression {
   }
 }
 
+/// Static characters are expressed with `{}`. Static expressions instantiate the contents as they are.
 ///
+/// E.g. `{-}` , `{42}` , `{xyz}`
 class StaticExpression extends RandomExpression {
-  ///
+  /// Don't use {} for the constructor
   StaticExpression(this.value);
 
-  ///
+  /// Static value
   String value;
 
   @override
@@ -188,6 +199,9 @@ class StaticExpression extends RandomExpression {
   }
 }
 
+/// `[<cl><cl>]` character class group. No sorting is done within the group.
+///
+/// `[a #]`  lower case letters or numbers
 class CharacterGroup extends RandomExpression with ExpressionGroup {
   ///
   CharacterGroup(String expression, bool onGenerateLengthForEach)
@@ -198,7 +212,7 @@ class CharacterGroup extends RandomExpression with ExpressionGroup {
   final bool _onGenerateLen;
 
   @override
-  bool get global => false;
+  bool get _global => false;
 
   @override
   Map<String, dynamic> description() {
@@ -217,7 +231,7 @@ class CharacterGroup extends RandomExpression with ExpressionGroup {
       NotEndOption? notEndOption}) {
     _setChildrenLen(delegate, lengthOption);
 
-    var l = List.from(childrenLenMatrix._childrenLenMatrix[2]).cast<int>();
+    var l = List.from(_childrenLenMatrix._childrenLenMatrix[2]).cast<int>();
     var res = StringBuffer();
     var count = 0;
     String? end;
@@ -239,7 +253,7 @@ class CharacterGroup extends RandomExpression with ExpressionGroup {
         if (l[i] > 0) {
           // print("AVAILABLE: ${(expressions[i] as CharacterClassExpression).charClass} : ${(expressions[i] as CharacterClassExpression).getAvailableForEnd(
           //     option<EndOption>(), option<NotEndOption>())}");
-          if ((expressions[i] as CharacterClassExpression).getAvailableForEnd(
+          if ((expressions[i] as CharacterClassExpression)._getAvailableForEnd(
               option<EndOption>(), option<NotEndOption>())) {
             if (lengthOption == 1) {
               end = (expressions[i] as CharacterClassExpression)._getOneForBoth(
