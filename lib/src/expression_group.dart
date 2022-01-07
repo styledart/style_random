@@ -84,13 +84,13 @@ mixin ExpressionGroup on RandomExpression {
         if (childrenLength == null) {
           int max = thisLen.max ?? 1 << 32;
           int min = thisLen.min ?? 0;
-          len = delegate.nextInt(maxInt: max, minInt: min);
+          len = delegate._nextInt(maxInt: max, minInt: min);
         } else if (childrenLength.isRange) {
           /// this range, child range
           int max =
               math.min(thisLen.max ?? 1 << 32, childrenLength.max ?? 1 << 32);
           int min = math.max(thisLen.min ?? 0, childrenLength.min ?? 0);
-          len = delegate.nextInt(maxInt: max, minInt: min);
+          len = delegate._nextInt(maxInt: max, minInt: min);
         } else {
           /// this range, child fix
           len = childrenLength.length!;
@@ -107,7 +107,7 @@ mixin ExpressionGroup on RandomExpression {
 
         /// children len unbounded
         if (childrenLength.isRange) {
-          len = delegate.nextInt(
+          len = delegate._nextInt(
               maxInt: childrenLength.max ?? 1 << 32,
               minInt: childrenLength.min ?? 0);
         } else {
@@ -165,7 +165,7 @@ mixin ExpressionGroup on RandomExpression {
           if (_m == 0) {
             le = 0;
           } else {
-            le = delegate.nextInt(minInt: mi, maxInt: _m);
+            le = delegate._nextInt(minInt: mi, maxInt: _m);
           }
 
           _childrenLenMatrix.addLength(firstRangeIndex, le);

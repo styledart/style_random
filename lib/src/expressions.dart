@@ -88,7 +88,7 @@ class CharacterClassExpression extends RandomExpression {
             " ${startWith != null ? "Not Start: ${startWith.params}" : null}.");
       }
       r = charClass.characters[
-          delegate.nextInt(maxInt: charClass.characters.length - 1)];
+          delegate._nextInt(maxInt: charClass.characters.length - 1)];
       i++;
     }
     return r;
@@ -112,7 +112,7 @@ class CharacterClassExpression extends RandomExpression {
             "on ${charClass.runtimeType}\n");
       }
       r = charClass.characters[
-          delegate.nextInt(maxInt: charClass.characters.length - 1)];
+          delegate._nextInt(maxInt: charClass.characters.length - 1)];
       i++;
     }
     return r;
@@ -131,7 +131,7 @@ class CharacterClassExpression extends RandomExpression {
             " ${notEndWith != null ? "Not End: ${notEndWith.params}" : null}.");
       }
       r = charClass.characters[
-          delegate.nextInt(maxInt: charClass.characters.length - 1)];
+          delegate._nextInt(maxInt: charClass.characters.length - 1)];
       i++;
     }
     return r;
@@ -162,7 +162,7 @@ class CharacterClassExpression extends RandomExpression {
         return _getOneForEnd(delegate, _e, _ne);
       } else {
         return charClass.characters[
-            delegate.nextInt(maxInt: charClass.characters.length - 1)];
+            delegate._nextInt(maxInt: charClass.characters.length - 1)];
       }
     }).join();
   }
@@ -237,7 +237,7 @@ class CharacterGroup extends RandomExpression with ExpressionGroup {
     String? end;
     while ((res.length + (end != null ? 1 : 0)) != lengthOption) {
       count++;
-      var i = delegate.nextInt(maxInt: l.length - 1);
+      var i = delegate._nextInt(maxInt: l.length - 1);
       if (count > math.pow(lengthOption, 2)) {
         throw ArgumentError(
             "There may is a infinity loop. Check your conditions possibilities."

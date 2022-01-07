@@ -1,12 +1,9 @@
-
-
 import 'package:style_random/random_dart.dart';
 import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
 
 void main() {
   var generator = RandomGenerator("/l(30-50)[/l(1)#./l(10)*].*{-}");
-
 
   test("test_parse", () {
     expect(generator.expressions[0], isA<CharacterGroup>());

@@ -53,8 +53,7 @@ class _IndexExpressionMatcher<T extends RandomExpression> extends Matcher {
   }
 }
 
-
-Matcher isCharClass<T extends CharacterClass>(){
+Matcher isCharClass<T extends CharacterClass>() {
   return _IsCharacterClass<T>();
 }
 
