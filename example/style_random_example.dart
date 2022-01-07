@@ -1,4 +1,4 @@
-import 'package:style_random/random_dart.dart';
+import 'package:style_random/style_random.dart';
 
 void main() {
   var gen = RandomGenerator(

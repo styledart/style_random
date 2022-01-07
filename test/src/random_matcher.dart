@@ -1,4 +1,4 @@
-import 'package:style_random/random_dart.dart';
+import 'package:style_random/style_random.dart';
 import 'package:test/test.dart';
 
 /// Check sample starting with character or character classes on

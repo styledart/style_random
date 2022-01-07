@@ -3,4 +3,4 @@
 /// More dartdocs go here.
 library random_dart;
 
-export 'src/random_dart_base.dart';
+export 'src/style_random_base.dart';

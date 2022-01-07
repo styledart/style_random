@@ -1,4 +1,4 @@
-import 'package:style_random/random_dart.dart';
+import 'package:style_random/style_random.dart';
 import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
 
