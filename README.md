@@ -3,6 +3,8 @@
 Random string generator with easy syntax and many complex options. Specify random template by character classes, define
 length, order by classes, add conditions like starting with, ending with or duplication.
 
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/mehmetyaz)
+
 # Features
 
 The random code generator that can be used for many needs is created with a single template. This template is parsed at
